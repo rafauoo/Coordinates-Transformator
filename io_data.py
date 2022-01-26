@@ -33,3 +33,14 @@ def import_from_txt(handle):
                                     float(data[4]),
                                     int(data[5])])
     return np.array(coordinates), header
+
+
+def write_to_txt(handle, header, data):
+    for line in header:
+        l = str(line) + ": " + str(header[line]) + "\n"
+        handle.write(l)
+    handle.write("=" * 300 + "\n")
+    for line in data:
+        for item in line:
+            handle.write(f"{round(item, 5):<12}" + "\t")
+        handle.write("\n")
