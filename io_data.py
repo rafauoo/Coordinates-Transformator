@@ -1,6 +1,4 @@
-import os
 import numpy as np
-from types import coroutine
 
 
 def import_from_txt(handle):
@@ -27,8 +25,9 @@ def import_from_txt(handle):
             elif line[0] != "%":
                 data = line.strip().split()
                 time = data[1].split(":")
-                sod = float(time[0]) * 3600 + float(time[1]) * 60 + float(time[2])
-                coordinates.append([sod, 
+                sod = float(time[0]) * 3600 + float(time[1]) * 60
+                sod += float(time[2])
+                coordinates.append([sod,
                                     float(data[2]),
                                     float(data[3]),
                                     float(data[4]),
