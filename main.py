@@ -3,9 +3,11 @@ from program import Program
 
 
 def main():
-    with open("./proj_1_dane-2.txt") as handle:
+    with open("./test.txt") as handle:
         coordinates, header = import_from_txt(handle)
-    Program(coordinates, header)
+    program = Program(coordinates, header)
+    print(program._flat_coords)
+    program.generate_raport()
 
 
 if __name__ == "__main__":
