@@ -1,3 +1,4 @@
+from pyrsistent import v
 from hirvonen import hirvonen
 import numpy as np
 from datetime import datetime
@@ -14,6 +15,15 @@ class Program:
         self._topo_coords = self.topocentric()
         self._flat_coords = self.flat()
         self._header = header
+    
+    def coordinates(self):
+        return self._coordinates
+
+    def topo_coords(self):
+        return self._topo_coords
+    
+    def flat_coords(self):
+        return self._flat_coords
 
     def mean(self, row):
         return mean(self._coordinates[:, row])
@@ -121,8 +131,35 @@ class Program:
             data.append(data_line)
         return data
 
+    def generate_names(self, curve=True, topo=True, flat=True):
+        names = []
+        names.append("sod")
+        names.append("X")
+        names.append("Y")
+        names.append("Z")
+        names.append("varia X")
+        names.append("varia Y")
+        names.append("varia Z")
+        names.append("stdev X")
+        names.append("stdev Y")
+        names.append("stdev Z")
+        if topo:
+            names.append("E")
+            names.append("N")
+            names.append("U")
+        if curve:
+            names.append("fi")
+            names.append("lam")
+            names.append("h")
+        if flat:
+            names.append("X2000")
+            names.append("Y2000")
+            names.append("h")
+        return names
+
     def generate_raport(self, curve=True, topo=True, flat=True):
         header = self.generate_header()
+        names = self.generate_names(curve, topo, flat)
         data = self.generate_data(curve, topo, flat)
         with open("./proj_1_raport.txt", "w") as handle:
-            write_to_txt(handle, header, data)
+            write_to_txt(handle, header, names, data)
