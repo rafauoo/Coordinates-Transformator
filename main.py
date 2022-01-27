@@ -1,11 +1,12 @@
-from pyrsistent import v
 from io_data import import_from_txt
 from program import Program
 from plotter import geocentric_plot_linear, geocentric_plot_histogram
 from plotter import enu_scatter_plot, system2000_scatter_plot
+from plotter import regression_plot
 
 
 def main():
+    "Console UI"
     with open("./proj_1_dane-2.txt") as handle:
         coordinates, header = import_from_txt(handle)
     program = Program(coordinates, header)
@@ -30,7 +31,14 @@ def main():
         if what_plot == "2":
             geocentric_plot_histogram(program)
         if what_plot == "3":
-            pass
+            what_coord = input("What coordinate do you want to make plot with? (X or Y or Z): ")
+            if what_coord == "X":
+                a, b = program.regression_params(1)
+            if what_coord == "Y":
+                a, b = program.regression_params(2)
+            if what_coord == "Z":
+                a, b = program.regression_params(3)
+            regression_plot(program, a, b, what_coord)
         if what_plot == "4":
             enu_scatter_plot(program)
         if what_plot == "5":

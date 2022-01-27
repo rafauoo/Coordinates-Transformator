@@ -2,6 +2,12 @@ import numpy as np
 
 
 def import_from_txt(handle):
+    """
+    Imports data from txt file and saves it to:
+    * coordinates numpy array with columns:
+        [SoD, X, Y, Z, Q]
+    * header dictionary (contains header data)
+    """
     coordinates = []
     header = {}
     is_header = True
@@ -36,6 +42,12 @@ def import_from_txt(handle):
 
 
 def write_to_txt(handle, header, names, data):
+    """
+    Writes given data to a txt file. It requires:
+    * header containg header data (like author or date):
+    * names - names for values stored in data
+    * data - all values included in raport
+    """
     for line in header:
         li = str(line) + ": " + str(header[line]) + "\n"
         handle.write(li)

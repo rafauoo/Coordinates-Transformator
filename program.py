@@ -1,4 +1,3 @@
-from pyrsistent import v
 from hirvonen import hirvonen
 import numpy as np
 from datetime import datetime
@@ -10,34 +9,58 @@ from io_data import write_to_txt
 
 class Program:
     def __init__(self, coordinates, header) -> None:
+        """
+        creates instance of program
+        Instance of program controls action of the whole program.
+        It was created to separate UI in main from deep logic.
+        """
         self._coordinates = coordinates
         self._curve_coords = self.curvilinear()
         self._topo_coords = self.topocentric()
         self._flat_coords = self.flat()
         self._header = header
-    
+
     def coordinates(self):
+        """
+        returns coordinates stored in numpy array with columns:
+        [SoD, X, Y, Z, Q]
+        """
         return self._coordinates
 
     def topo_coords(self):
+        """
+        returns topocentric coordinates (after transformation)
+        stored in numpy array with columns:
+        [E, N, U]
+        """
         return self._topo_coords
-    
+
     def flat_coords(self):
+        """
+        returns flat system 2000 coordinates (after transformation)
+        stored in numpy array with columns:
+        [X, Y, h]
+        """
         return self._flat_coords
 
-    def mean(self, row):
+    def mean(self, row: int):
+        "calculates average of coordinate given by row"
         return mean(self._coordinates[:, row])
 
-    def median(self, row):
+    def median(self, row: int):
+        "calculates median of coordinate given by row"
         return median(self._coordinates[:, row])
 
-    def variance(self, row):
+    def variance(self, row: int):
+        "calculates variance of coordinate given by row"
         return variance(self._coordinates[:, row])
 
-    def deviation(self, row):
+    def deviation(self, row: int):
+        "calculates standard deviation of coordinate given by row"
         return stdev(self._coordinates[:, row])
 
     def curvilinear(self):
+        "transforms geocentric coordinates to curvilinear coordinates (Fi, Lam, H)"
         curve_coords = []
         for row in self._coordinates:
             x = row[1]
@@ -48,11 +71,13 @@ class Program:
         return np.array(curve_coords)
 
     def topocentric(self):
-        # liczymy srednie dla x,y,z
+        """
+        Transforms geocentric coordinates to topocentric coordinates (E, N, U).
+        It takes averages of (X, Y, Z) as the center of local coordinate system.
+        """
         x0 = self.mean(1)
         y0 = self.mean(2)
         z0 = self.mean(3)
-        print(x0, y0, z0)
         topo_coords = []
         fi2, lam, h, n = hirvonen(x0, y0, z0)
         for row in self._coordinates:
@@ -65,6 +90,10 @@ class Program:
         return np.array(topo_coords)
 
     def flat(self):
+        """
+        transforms geocentric coordinates to flat system 2000
+        coordinates (X, Y, H)
+        """
         flat_coords = []
         for row in self._coordinates:
             x = row[1]
@@ -76,6 +105,7 @@ class Program:
         return np.array(flat_coords)
 
     def generate_header(self):
+        "generates header for output file"
         header = {}
         header["Author"] = "Imie i nazwisko"
         header["Date"] = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -97,6 +127,7 @@ class Program:
         return header
 
     def generate_data(self, curve=True, topo=True, flat=True):
+        "generates data for output file (below header)"
         variance_x = self.variance(1)
         variance_y = self.variance(2)
         variance_z = self.variance(3)
@@ -132,6 +163,7 @@ class Program:
         return data
 
     def generate_names(self, curve=True, topo=True, flat=True):
+        "generates names for values for output file"
         names = []
         names.append("sod")
         names.append("X")
@@ -158,8 +190,26 @@ class Program:
         return names
 
     def generate_raport(self, curve=True, topo=True, flat=True):
+        "generates raport and exports to txt file"
         header = self.generate_header()
         names = self.generate_names(curve, topo, flat)
         data = self.generate_data(curve, topo, flat)
         with open("./proj_1_raport.txt", "w") as handle:
             write_to_txt(handle, header, names, data)
+
+    def regression_params(self, row):
+        "calculates regression params (a, b)"
+        value = self._coordinates[:, row]
+        sod = self._coordinates[:, 0]
+        mean_x = self.mean(0)
+        mean_y = self.mean(row)
+        xi_meanx = [x - mean_x for x in sod]
+        xi_meanx_2 = [(x - mean_x)**2 for x in sod]
+        yi_meany = [y - mean_y for y in value]
+        up = []
+        for index, x in enumerate(xi_meanx):
+            up.append(x*yi_meany[index])
+        a = sum(up)
+        a /= sum(xi_meanx_2)
+        b = mean_y - a * mean_x
+        return a, b
