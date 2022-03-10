@@ -190,7 +190,7 @@ class Program:
         return names
 
     def generate_raport(self, curve=True, topo=True, flat=True):
-        "generates raport and exports to txt file"
+        "generates raport and exports it to txt file"
         header = self.generate_header()
         names = self.generate_names(curve, topo, flat)
         data = self.generate_data(curve, topo, flat)
@@ -213,3 +213,34 @@ class Program:
         a /= sum(xi_meanx_2)
         b = mean_y - a * mean_x
         return a, b
+
+    def generate_regression_raport(self, a, b, what_coord):
+        """
+        generates regression raport and exports it to txt file
+        """
+        header = {
+            "a": round(a, 10),
+            "b": round(b, 10),
+            "f(x)": "ax + b",
+            "Coordinate": what_coord
+        }
+        row = -1
+        if what_coord == "X":
+            row = 1
+        if what_coord == "Y":
+            row = 2
+        if what_coord == "Z":
+            row = 3
+        names = ["SoD", "error in %"]
+        sod = self._coordinates[:, 0]
+        all_x_np = np.arange(int(min(sod)), int(max(sod) + 1), 1)
+        all_x = [x for x in all_x_np]
+        all_y = [a * x + b for x in all_x]
+        errors = []
+        data = []
+        for index, y in enumerate(self.coordinates()[:, row]):
+            errors.append(abs(y - all_y[index]) * 100 / y)
+        for index, s in enumerate(sod):
+            data.append([s, float(errors[index])])
+        with open("./proj_1_raport_regresja.txt", "w") as handle:
+            write_to_txt(handle, header, names, data)

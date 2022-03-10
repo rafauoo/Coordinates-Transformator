@@ -57,5 +57,5 @@ def write_to_txt(handle, header, names, data):
     handle.write("\n")
     for line in data:
         for item in line:
-            handle.write(f"{round(item, 5):<12}" + "\t")
+            handle.write(f"{round(item, 8):<12}" + "\t")
         handle.write("\n")

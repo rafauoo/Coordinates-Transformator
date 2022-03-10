@@ -14,7 +14,7 @@ def main():
     curve = True if curve == "YES" else False
     topo = input("Transform coordinates to topocentric(E, N, U)? (YES or NO): ")
     topo = True if topo == "YES" else False
-    flat = input("Transform coordinates to system 2000(Fi, lam, H)? (YES or NO): ")
+    flat = input("Transform coordinates to system 2000(X, Y, H)? (YES or NO): ")
     flat = True if flat == "YES" else False
     program.generate_raport(curve, topo, flat)
     again = True
@@ -22,9 +22,9 @@ def main():
         print("Plot options: ")
         print("1. Geocentric linear plot (X, Y, Z - 3 subplots)")
         print("2. Geocentric histogram plot (X, Y, Z - 3 subplots)")
-        print("3. Geocentric todo")
+        print("3. Geocentric linear plot with regression and errors for given coordinate (2 subplots)")
         print("4. Topocentric scatter plot ((E, N), Z - 2 subplots)")
-        print("5. Flat system 2000 scatter plot ((X, Y), h - 3 subplots)")
+        print("5. Flat system 2000 scatter plot ((X, Y), h - 2 subplots)")
         what_plot = input("Type plot number (or type anything else to exit): ")
         if what_plot == "1":
             geocentric_plot_linear(program)
@@ -39,6 +39,7 @@ def main():
             if what_coord == "Z":
                 a, b = program.regression_params(3)
             regression_plot(program, a, b, what_coord)
+            program.generate_regression_raport(a, b, what_coord)
         if what_plot == "4":
             enu_scatter_plot(program)
         if what_plot == "5":

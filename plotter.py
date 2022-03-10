@@ -114,29 +114,35 @@ def regression_plot(program, a, b, what_coord):
         row = 2
     if what_coord == "Z":
         row = 3
-    all_x_np = np.arange(int(min(sod)), int(max(sod)), 1)
+    all_x_np = np.arange(int(min(sod)), int(max(sod) + 1), 1)
     all_x = [x for x in all_x_np]
     all_y = [a * x + b for x in all_x]
     sod = program.coordinates()[:, 0]
+    coords = [coord for coord in program.coordinates()[:, row]]
     fig, axs = plt.subplots(2, constrained_layout=True)
     # Regression plot
-    axs[0].plot(sod, program.coordinates()[:, row])
+    axs[0].plot(sod, coords)
     axs[0].plot(all_x, all_y)
     axs[0].set_title(f"{what_coord} & Regression Line", fontsize=20)
     axs[0].legend([f"{what_coord}", "Regression Line"])
     axs[0].set_xlabel("Second Of The Day", fontsize=8)
     axs[0].set_ylabel(f"{what_coord}")
+    plt.ticklabel_format(style='plain')
     axs[0].yaxis.major.formatter._useMathText = True
     axs[0].xaxis.major.formatter._useMathText = True
+    axs[0].yaxis.get_major_formatter().set_scientific(True)
     # Error plot
-    axs[1].plot(sod, program.coordinates()[:, row])
-    axs[1].plot(all_x, all_y)
-    axs[1].set_title(f"{what_coord} & Regression Line", fontsize=20)
-    axs[1].legend([f"{what_coord}", "Regression Line"])
+    errors = []
+    for index, y in enumerate(program.coordinates()[:, row]):
+        errors.append(abs(y - all_y[index]) * 100 / y)
+    axs[1].plot(sod, errors)
+    axs[1].set_title(f"{what_coord} Regression Line Errors", fontsize=20)
+    axs[1].legend([f"{what_coord} error"])
     axs[1].set_xlabel("Second Of The Day", fontsize=8)
-    axs[1].set_ylabel(f"{what_coord}")
+    axs[1].set_ylabel("error in %")
     axs[1].yaxis.major.formatter._useMathText = True
     axs[1].xaxis.major.formatter._useMathText = True
+    axs[1].yaxis.get_major_formatter().set_scientific(False)
     plt.gcf().set_size_inches(14, 10)
     plt.savefig(f"regression_plot_for_{what_coord}.png")
     plt.show()
